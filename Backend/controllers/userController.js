@@ -1,0 +1,124 @@
+const userModel = require('../models/userSchema');
+
+module.exports.addUserClient = async (req, res) => {
+    try {
+        const { username, email, password,age } = req.body;
+        const roleClient = 'client';
+        
+        const user = await userModel.create({
+            username,
+            email,
+            password,
+            age,
+            role: roleClient
+        });
+
+        res.status(200).json({ user });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+module.exports.addUserAdmin= async (req,res) => {
+    try {
+        const {username , email , password } = req.body;
+        const roleAdmin = 'admin'
+        const user = await userModel.create({
+            username,email ,password,role :roleAdmin
+        })
+        res.status(200).json({user});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }}
+    module.exports.getAllUsers= async (req,res) => {
+        try {
+            const userListe = await userModel.find()
+            res.status(200).json({userListe});
+        } catch (error) {
+            res.status(500).json({message: error.message});
+        }
+    }
+    module.exports.getUserById= async (req,res) => {
+        try {
+            
+            const {id} = req.params
+            const user = await userModel.findById(id)
+    
+            res.status(200).json({user});
+        } catch (error) {
+            res.status(500).json({message: error.message});
+        }
+    }
+    module.exports.deleteUserById= async (req,res) => {
+        try {
+            const {id} = req.params
+    
+            const checkIfUserExists = await userModel.findById(id);
+            if (!checkIfUserExists) {
+              throw new Error("User not found");
+            }
+    
+            await userModel.findByIdAndDelete(id)
+    
+            res.status(200).json("deleted");
+        } catch (error) {
+            res.status(500).json({message: error.message});
+        }
+    }
+    module.exports.addUserClientWithImg = async (req,res) => {
+        try {
+            const {username , email , password } = req.body;
+            const roleClient = 'client'
+            const {filename} = req.file
+    
+            const user = await userModel.create({
+                username,email ,password,role :roleClient , user_image : filename
+            })
+            res.status(200).json({user});
+        } catch (error) {
+            res.status(500).json({message: error.message});
+        }
+    }
+    module.exports.updateuserById = async (req, res) => {
+        try {
+            const {id} = req.params
+            const {email , username} = req.body;
+        
+            await userModel.findByIdAndUpdate(id,{$set : {email , username }})
+            const updated = await userModel.findById(id)
+        
+            res.status(200).json({updated})
+        } catch (error) {
+            res.status(500).json({message: error.message});
+        }
+        }
+        module.exports.searchUserByUsername = async (req, res) => {
+            try {
+        
+                const { username } = req.query
+                if(!username){
+                    throw new Error("Veuillez fournir un nom pour la recherche.");
+                }
+        
+                const userListe = await userModel.find({
+                    username: {$regex: username , $options: "i"}
+                })
+        
+                if (!userListe) {
+                    throw new Error("User not found");
+                  }
+                  const count = userListe.length
+                res.status(200).json({userListe,count})
+            } catch (error) {
+                res.status(500).json({message: error.message});
+            }
+            }
+            module.exports.login= async (req,res) => {
+                try {
+                    const { email , password } = req.body;
+                    const user = await userModel.login(email, password)
+                    res.status(200).json({user})
+                } catch (error) {
+                    res.status(500).json({message: error.message});
+                }
+            }

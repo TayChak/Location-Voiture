@@ -1,0 +1,14 @@
+const upload = require('../middlewares/uploadFile');
+var express = require('express');
+var router = express.Router();
+const userController = require('../controllers/userController');
+router.post('/addUserClient',userController.addUserClient); 
+router.post('/addUserAdmin',userController.addUserAdmin); 
+router.get('/getAllUsers',userController.getAllUsers); 
+router.get('/getUserById/:id',userController.getUserById); 
+router.delete('/deleteUserById/:id',userController.deleteUserById); 
+router.post('/addUserClientWithImg',upload.single("image_user"),userController.addUserClientWithImg); 
+router.put('/updateuserById/:id',userController.updateuserById);
+router.get('/searchUserByUsername',userController.searchUserByUsername);
+router.post('/login',userController.login); 
+module.exports = router;
