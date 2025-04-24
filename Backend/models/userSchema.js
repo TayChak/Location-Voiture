@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Veuillez entrer une adresse e-mail valide"],
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address."],
     },
     password: {
       type: String,
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       minLength: 8,
       match: [
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
+        "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       ],
     },
     role: {
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      min: [18, "L'âge doit être d'au moins 18 ans."],
+      min: [18, "Age must be at least 18."],
     },
     count: {
       type: Number,
@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash du mot de passe + initialisation de certains champs
+// Hash password and initialize fields before saving
 userSchema.pre("save", async function (next) {
   try {
     if (this.isModified("password")) {
@@ -77,34 +77,34 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Log après création
+// Log after saving a new user
 userSchema.post("save", function (doc) {
-  console.log(`✅ Utilisateur "${doc.username}" créé avec succès.`);
+  console.log(`✅ User "${doc.username}" was successfully created.`);
 });
 
-// Méthode statique de connexion
+// Static method for login
 userSchema.statics.login = async function (email, password) {
   const user = await this.findOne({ email });
   if (!user) {
-    throw new Error("Adresse e-mail introuvable.");
+    throw new Error("Email not found.");
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Mot de passe incorrect.");
+    throw new Error("Invalid password.");
   }
 
   return user;
 };
 
-// Méthode pour masquer le mot de passe à l’export JSON
+// Hide password when converting to JSON
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;
   return userObject;
 };
 
-// Vérifie si l'utilisateur a un rôle spécifique
+// Check if user has a specific role
 userSchema.methods.hasRole = function (role) {
   return this.role === role;
 };
